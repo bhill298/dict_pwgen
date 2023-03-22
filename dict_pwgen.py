@@ -10,15 +10,15 @@ import sys
 def read_words(fname, delimiter="\n"):
     with open(fname) as f:
         return set(f.read().split(delimiter))
-       
-       
+
+
 def word_filter(word, args):
     if len(word) >= args.min_wordlen and len(word) <= args.max_wordlen:
         if not args.allow_hyphen:
             return '-' not in word
     return False
-    
-    
+
+
 def trans_word(word, trans_table, args):
     chars = []
     if args.always_upper_start:
@@ -37,7 +37,7 @@ def trans_word(word, trans_table, args):
 def get_password_crack_times(pw):
     sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "zxcvbn-python"))
     from zxcvbn import zxcvbn
-    
+
     results = zxcvbn(pw)
     output = []
     output.append("Crack times:")
@@ -47,8 +47,8 @@ def get_password_crack_times(pw):
         value = value.title()
         output.append(f"{key:<{col_size}}: {value}")
     return '\n'.join(output)
-    
-    
+
+
 parser = argparse.ArgumentParser(description="Generate passwords using dictionary words that are easier to remember")
 parser.add_argument('-s', "--sciterms", action="store_true", help="use science terms dictionary")
 parser.add_argument('-j', "--jargon", action="store_true", help="use jargon (names / proper nouns, more complex words) dictionary")
@@ -119,7 +119,7 @@ for idx, word in enumerate(selection):
                 do_insert = i == 0 or i == len(word)
             elif args.add_char_where == "everywhere":
                 do_insert = True
-    
+
             if do_insert and random.random() < args.add_char_prob:
                 word_list.append(random.choice(symbols_digits))
             if i < len(word):
