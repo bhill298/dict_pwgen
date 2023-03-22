@@ -63,7 +63,12 @@ parser.add_argument('-c', "--add-char-prob", type=float, default=0.0, help="add 
 parser.add_argument('-w', "--add-char-where", choices=("between", "beforeafter", "everywhere"), default="between",
     help="where to add numbers + symbols (between words, before and after words, everywhere - including between characters)")
 parser.add_argument('-r', "--crack-times", action="store_true", help="Print estimate crack times for generated password (using zxcvbn)")
+parser.add_argument('-R', "--check-crack-times", default=None, help="Give a password to check crack times for rather then generating a new one.")
 args = parser.parse_args()
+
+if args.check_crack_times is not None:
+    print(get_password_crack_times(args.check_crack_times))
+    sys.exit(0)
 
 if args.max_wordlen < 0:
     raise ValueError(f"max wordlen should not be < 0, got {args.max_wordlen}")
