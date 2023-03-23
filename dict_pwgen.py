@@ -7,9 +7,8 @@ import string
 import sys
 
 
-def read_words(fname, delimiter="\n"):
-    with open(fname) as f:
-        return set(f.read().split(delimiter))
+def read_words(f, delimiter="\n"):
+    return set(f.read().split(delimiter))
 
 
 def word_filter(word, args):
@@ -55,8 +54,9 @@ def relpath(fname):
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     description="Generate passwords using dictionary words that are easier to remember")
-parser.add_argument('-s', "--sciterms", action="store_true", help="use science terms dictionary")
-parser.add_argument('-j', "--jargon", action="store_true", help="use jargon (names / proper nouns, more complex words) dictionary")
+parser.add_argument('-i', "--input-dict", type=argparse.FileType('r'), action="append", help="use custom wordlist (can be passed multiple times)")
+parser.add_argument('-s', "--sciterms", action="store_true", help="use science terms dictionary (ignored with -i)")
+parser.add_argument('-j', "--jargon", action="store_true", help="use jargon (names / proper nouns, more complex words) dictionary (ignored with -i)")
 parser.add_argument('-m', "--min-wordlen", type=int, default=6, help="min length of words to use")
 parser.add_argument('-a', "--max-wordlen", type=int, default=float("inf"), help="max length of words to use")
 parser.add_argument('-n', "--num-words", type=int, default=4, help="number of words to generate")
@@ -103,12 +103,24 @@ trans_table = {
     'i': ['!'],
 }
 
-words = read_words(relpath("words.txt"))
-if args.sciterms:
-    words = words.union(read_words(relpath("science-terms.txt")))
-if args.jargon:
-    words = words.union(read_words(relpath("jargon.txt")))
+if args.input_dict is not None:
+    input_files = args.input_dict
+else:
+    input_files = []
+    input_filenames = ["words.txt"]
+    if args.sciterms:
+        input_filenames.append("science-terms.txt")
+    if args.jargon:
+        input_filenames.append("jargon.txt")
+    for fname in input_filenames:
+        input_files.append(open(relpath(fname)))
+words = set()
+for f in input_files:
+    words = words.union(read_words(f))
+    f.close()
 words = list({word for word in words if word_filter(word, args)})
+if len(words) < args.num_words:
+    raise ValueError(f"Filtered wordlist has {len(words)} unique elements, which is too short for password length {args.num_words}")
 selection = random.sample(words, k=args.num_words)
 final_words = []
 for idx, word in enumerate(selection):
