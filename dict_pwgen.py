@@ -18,15 +18,22 @@ def word_filter(word, args):
     return False
 
 
+def true_with_prob(p):
+    # techincally this can return exactly 0 (0.0 <= X < 1.0)
+    if p <= 0.0:
+        return False
+    return random.random() < p
+
+
 def trans_word(word, trans_table, args):
     chars = []
     if args.always_upper_start:
         chars.append(word[0].upper())
         word = word[1:]
     for c in word:
-        if random.random() < args.trans_modify_prob:
+        if true_with_prob(args.trans_modify_prob):
             c = random.choice(trans_table.get(c, [c]))
-        if random.random() < args.upper_modify_prob:
+        if true_with_prob(args.upper_modify_prob):
             # this can trigger again after the symbol replacement, will just do nothing
             c = c.upper()
         chars.append(c)
@@ -151,7 +158,7 @@ for idx, word in enumerate(selection):
             elif args.add_char_where == "everywhere":
                 do_insert = True
 
-            if do_insert and random.random() < args.add_char_prob:
+            if do_insert and true_with_prob(args.add_char_prob):
                 word_list.append(random.choice(symbols_digits))
             if i < len(word):
                 word_list.append(word[i])
