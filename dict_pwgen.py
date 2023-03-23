@@ -49,17 +49,19 @@ def get_password_crack_times(pw):
     return '\n'.join(output)
 
 
-parser = argparse.ArgumentParser(description="Generate passwords using dictionary words that are easier to remember")
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    description="Generate passwords using dictionary words that are easier to remember")
 parser.add_argument('-s', "--sciterms", action="store_true", help="use science terms dictionary")
 parser.add_argument('-j', "--jargon", action="store_true", help="use jargon (names / proper nouns, more complex words) dictionary")
-parser.add_argument('-m', "--min-wordlen", type=int, default=0, help="min length of words to use")
+parser.add_argument('-m', "--min-wordlen", type=int, default=6, help="min length of words to use")
 parser.add_argument('-a', "--max-wordlen", type=int, default=float("inf"), help="max length of words to use")
 parser.add_argument('-n', "--num-words", type=int, default=4, help="number of words to generate")
 parser.add_argument('-y', "--allow-hyphen", action="store_true", help="allow words with hyphens")
 parser.add_argument('-t', "--trans-modify-prob", type=float, default=0.0, help="transform characters in words with some probability [0, 1] (e.g. 'a' -> @)")
 parser.add_argument('-u', "--upper-modify-prob", type=float, default=0.0, help="uppercase characters in words with some probability [0, 1]")
-parser.add_argument('-U', "--always-upper-start", action="store_true", help="always make first character of each word uppercase (skips all other modifications)")
-parser.add_argument('-c', "--add-char-prob", type=float, default=0.0, help="add number + symbols with some probability [0, 1]")
+parser.add_argument('-U', "--always-upper-start", action="store_true",
+    help="always make first character of each word uppercase (skips all other modifications for that character)")
+parser.add_argument('-c', "--add-char-prob", type=float, default=1.0, help="add number + symbols with some probability [0, 1]")
 parser.add_argument('-w', "--add-char-where", choices=("between", "beforeafter", "everywhere"), default="between",
     help="where to add numbers + symbols (between words, before and after words, everywhere - including between characters)")
 parser.add_argument('-r', "--crack-times", action="store_true", help="Print estimate crack times for generated password (using zxcvbn)")
@@ -83,7 +85,7 @@ if args.upper_modify_prob < 0.0 or args.upper_modify_prob > 1.0:
 if args.add_char_prob < 0.0 or args.add_char_prob > 1.0:
     raise ValueError(f"add char prob should be in [0, 1], got {args.add_char_prob}")
 
-symbols = "!@#$%^&_-?.,~"
+symbols = "!@#$%^&_-?.,~\"'()*+/:;<>=`|"
 symbols_digits = string.digits + symbols
 trans_table = {
     's': ['5', '$'],
