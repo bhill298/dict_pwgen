@@ -6,7 +6,7 @@ import string
 import sys
 
 
-def read_words(f, delimiter="\n"):
+def read_words(f, delimiter):
     return set(f.read().split(delimiter))
 
 
@@ -79,24 +79,27 @@ def positive_int_arg(i, disallow_zero=False):
 positive_int_arg_nonzero = lambda i: positive_int_arg(i, disallow_zero=True)
 
 
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    description="Generate passwords using dictionary words that are easier to remember")
+parser = argparse.ArgumentParser(description="Generate passwords using dictionary words that are easier to remember")
 parser.add_argument('-i', "--input-dict", type=argparse.FileType('r'), action="append", help="use custom wordlist (can be passed multiple times)")
+parser.add_argument('-d', "--delimiter", default='\n', help="word delimiter for input files (default: newline)")
 parser.add_argument('-s', "--sciterms", action="store_true", help="use science terms dictionary (ignored with -i)")
 parser.add_argument('-j', "--jargon", action="store_true", help="use jargon (names / proper nouns, more complex words) dictionary (ignored with -i)")
-parser.add_argument('-m', "--min-wordlen", type=positive_int_arg, default=6, help="min length of words to use")
-parser.add_argument('-a', "--max-wordlen", type=positive_int_arg_nonzero, default=float("inf"), help="max length of words to use")
-parser.add_argument('-n', "--num-words", type=positive_int_arg_nonzero, default=4, help="number of words to generate")
+parser.add_argument('-m', "--min-wordlen", type=positive_int_arg, default=6, help="min length of words to use (default: %(default)s)")
+parser.add_argument('-a', "--max-wordlen", type=positive_int_arg_nonzero, default=float("inf"), help="max length of words to use (default: no max)")
+parser.add_argument('-n', "--num-words", type=positive_int_arg_nonzero, default=4, help="number of words to generate (default: %(default)s)")
 parser.add_argument('-y', "--allow-hyphen", action="store_true", help="allow words with hyphens")
-parser.add_argument('-t', "--trans-modify-prob", type=prob_arg, default=0.0, help="transform characters in words with some probability [0, 1] (e.g. 'a' -> @)")
-parser.add_argument('-u', "--upper-modify-prob", type=prob_arg, default=0.0, help="uppercase characters in words with some probability [0, 1]")
+parser.add_argument('-t', "--trans-modify-prob", type=prob_arg, default=0.0,
+    help="transform characters in words with some probability [0, 1] (e.g. 'a' -> @) (default: %(default)s)")
+parser.add_argument('-u', "--upper-modify-prob", type=prob_arg, default=0.0,
+    help="uppercase characters in words with some probability [0, 1] (default: %(default)s)")
 parser.add_argument('-U', "--always-upper-start", action="store_true",
     help="always make first character of each word uppercase (skips all other modifications for that character)")
-parser.add_argument('-c', "--add-char-prob", type=prob_arg, default=1.0, help="add number + symbols with some probability [0, 1]")
+parser.add_argument('-c', "--add-char-prob", type=prob_arg, default=1.0,
+    help="add number + symbols with some probability [0, 1] (default: %(default)s)")
 parser.add_argument('-w', "--add-char-where", choices=("between", "beforeafter", "everywhere"), default="between",
-    help="where to add numbers + symbols (between words, before and after words, everywhere - including between characters)")
-parser.add_argument('-r', "--crack-times", action="store_true", help="Print estimate crack times for generated password (using zxcvbn)")
-parser.add_argument('-R', "--check-crack-times", default=None, help="Give a password to check crack times for rather then generating a new one.")
+    help="where to add numbers + symbols (between words, before and after words, everywhere - including between characters) (default: %(default)s)")
+parser.add_argument('-r', "--crack-times", action="store_true", help="print estimate crack times for generated password (using zxcvbn)")
+parser.add_argument('-R', "--check-crack-times", default=None, help="give a password to check crack times for rather then generating a new one.")
 args = parser.parse_args()
 
 if args.check_crack_times is not None:
@@ -134,7 +137,7 @@ else:
 
 words = set()
 for f in input_files:
-    words = words.union(read_words(f))
+    words = words.union(read_words(f, args.delimiter))
     f.close()
 words = list({word for word in words if word_filter(word, args)})
 if len(words) < args.num_words:
