@@ -49,6 +49,10 @@ def get_password_crack_times(pw):
     return '\n'.join(output)
 
 
+def relpath(fname):
+    return os.path.join(os.path.dirname(__file__), fname)
+
+
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     description="Generate passwords using dictionary words that are easier to remember")
 parser.add_argument('-s', "--sciterms", action="store_true", help="use science terms dictionary")
@@ -99,11 +103,11 @@ trans_table = {
     'i': ['!'],
 }
 
-words = read_words("words.txt")
+words = read_words(relpath("words.txt"))
 if args.sciterms:
-    words = words.union(read_words("science-terms.txt"))
+    words = words.union(read_words(relpath("science-terms.txt")))
 if args.jargon:
-    words = words.union(read_words("jargon.txt"))
+    words = words.union(read_words(relpath("jargon.txt")))
 words = list({word for word in words if word_filter(word, args)})
 selection = random.sample(words, k=args.num_words)
 final_words = []
