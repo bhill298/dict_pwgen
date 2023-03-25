@@ -87,6 +87,7 @@ parser.add_argument('-j', "--jargon", action="store_true", help="use jargon (nam
 parser.add_argument('-m', "--min-wordlen", type=positive_int_arg, default=6, help="min length of words to use (default: %(default)s)")
 parser.add_argument('-a', "--max-wordlen", type=positive_int_arg_nonzero, default=float("inf"), help="max length of words to use (default: no max)")
 parser.add_argument('-n', "--num-words", type=positive_int_arg_nonzero, default=4, help="number of words to generate (default: %(default)s)")
+parser.add_argument('-N', "--num-pwds", type=positive_int_arg_nonzero, default=1, help="number of passwords to generate (default: %(default)s)")
 parser.add_argument('-y', "--allow-hyphen", action="store_true", help="allow words with hyphens")
 parser.add_argument('-t', "--trans-modify-prob", type=prob_arg, default=0.0,
     help="transform characters in words with some probability [0, 1] (e.g. 'a' -> @) (default: %(default)s)")
@@ -143,32 +144,34 @@ words = list({word for word in words if word_filter(word, args)})
 if len(words) < args.num_words:
     raise ValueError(f"Filtered wordlist has {len(words)} unique elements, which is too short for password length {args.num_words}")
 
-selection = random.sample(words, k=args.num_words)
-final_words = []
-for idx, word in enumerate(selection):
-    last_word = idx == len(selection) - 1
-    word = word.lower()
-    word = trans_word(word, trans_table, args)
-    if args.add_char_prob > 0.0:
-        word_list = []
-        for i in range(len(word) + 1):
-            do_insert = False
-            if args.add_char_where == "between":
-                do_insert = i == len(word) and not last_word
-            elif args.add_char_where == "beforeafter":
-                do_insert = i == 0 or i == len(word)
-            elif args.add_char_where == "everywhere":
-                do_insert = True
+for pwd_it in range(args.num_pwds):
+    selection = random.sample(words, k=args.num_words)
+    final_words = []
+    for idx, word in enumerate(selection):
+        last_word = idx == len(selection) - 1
+        word = word.lower()
+        word = trans_word(word, trans_table, args)
+        if args.add_char_prob > 0.0:
+            word_list = []
+            for i in range(len(word) + 1):
+                do_insert = False
+                if args.add_char_where == "between":
+                    do_insert = i == len(word) and not last_word
+                elif args.add_char_where == "beforeafter":
+                    do_insert = i == 0 or i == len(word)
+                elif args.add_char_where == "everywhere":
+                    do_insert = True
 
-            if do_insert and true_with_prob(args.add_char_prob):
-                word_list.append(random.choice(symbols_digits))
-            if i < len(word):
-                word_list.append(word[i])
-        word = ''.join(word_list)
-    final_words.append(word)
-pw = ''.join(final_words)
+                if do_insert and true_with_prob(args.add_char_prob):
+                    word_list.append(random.choice(symbols_digits))
+                if i < len(word):
+                    word_list.append(word[i])
+            word = ''.join(word_list)
+        final_words.append(word)
+    pw = ''.join(final_words)
 
-print(pw)
-if args.crack_times:
-    print()
-    print(get_password_crack_times(pw))
+    print(pw)
+    if args.crack_times:
+        print(get_password_crack_times(pw))
+        if args.num_pwds > 1 and pwd_it < args.num_pwds - 1:
+            print()
