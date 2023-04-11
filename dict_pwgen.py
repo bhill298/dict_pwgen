@@ -11,9 +11,14 @@ def read_words(f, delimiter):
 
 
 def word_filter(word, args):
+    is_valid = True
     if len(word) >= args.min_wordlen and len(word) <= args.max_wordlen:
-        if not args.allow_hyphen:
-            return '-' not in word
+        is_valid = True
+        if is_valid and not args.allow_space:
+            is_valid = ' ' not in word
+        if is_valid and not args.allow_hyphen:
+            is_valid = '-' not in word
+        return is_valid
     return False
 
 
@@ -89,6 +94,7 @@ parser.add_argument('-a', "--max-wordlen", type=positive_int_arg_nonzero, defaul
 parser.add_argument('-n', "--num-words", type=positive_int_arg_nonzero, default=4, help="number of words to generate (default: %(default)s)")
 parser.add_argument('-N', "--num-pwds", type=positive_int_arg_nonzero, default=1, help="number of passwords to generate (default: %(default)s)")
 parser.add_argument('-y', "--allow-hyphen", action="store_true", help="allow words with hyphens")
+parser.add_argument('-p', "--allow-space", action="store_true", help="allow words with spaces")
 parser.add_argument('-t', "--trans-modify-prob", type=prob_arg, default=0.0,
     help="transform characters in words with some probability [0, 1] (e.g. 'a' -> @) (default: %(default)s)")
 parser.add_argument('-u', "--upper-modify-prob", type=prob_arg, default=0.0,
