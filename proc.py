@@ -6,7 +6,7 @@ import os
 def in_file(f, delimiter):
     out = set()
     for word in f.read().split(delimiter):
-        word = word.strip()
+        word = word.strip().lower()
         if len(word) > 0:
             out.add(word)
     return out
