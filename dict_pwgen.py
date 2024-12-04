@@ -87,8 +87,6 @@ positive_int_arg_nonzero = lambda i: positive_int_arg(i, disallow_zero=True)
 parser = argparse.ArgumentParser(description="Generate passwords using dictionary words that are easier to remember")
 parser.add_argument('-i', "--input-dict", type=argparse.FileType('r'), action="append", help="use custom wordlist (can be passed multiple times)")
 parser.add_argument('-d', "--delimiter", default='\n', help="word delimiter for input files (default: newline)")
-parser.add_argument('-s', "--sciterms", action="store_true", help="use science terms dictionary (ignored with -i)")
-parser.add_argument('-j', "--jargon", action="store_true", help="use jargon (names / proper nouns, more complex words) dictionary (ignored with -i)")
 parser.add_argument('-m', "--min-wordlen", type=positive_int_arg, default=6, help="min length of words to use (default: %(default)s)")
 parser.add_argument('-a', "--max-wordlen", type=positive_int_arg_nonzero, default=float("inf"), help="max length of words to use (default: no max)")
 parser.add_argument('-n', "--num-words", type=positive_int_arg_nonzero, default=4, help="number of words to generate (default: %(default)s)")
@@ -135,10 +133,6 @@ if args.input_dict is not None:
 else:
     input_files = []
     input_filenames = ["words.txt"]
-    if args.sciterms:
-        input_filenames.append("science-terms.txt")
-    if args.jargon:
-        input_filenames.append("jargon.txt")
     for fname in input_filenames:
         input_files.append(open(relpath(fname)))
 
