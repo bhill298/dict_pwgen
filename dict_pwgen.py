@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import glob
 import os
 import random
 import string
@@ -85,7 +86,8 @@ positive_int_arg_nonzero = lambda i: positive_int_arg(i, disallow_zero=True)
 
 
 parser = argparse.ArgumentParser(description="Generate passwords using dictionary words that are easier to remember")
-parser.add_argument('-i', "--input-dict", type=argparse.FileType('r'), action="append", help="use custom wordlist (can be passed multiple times)")
+parser.add_argument('-i', "--input-dict", type=argparse.FileType('r'), default=[], action="append", help="use custom wordlist (can be passed multiple times)")
+parser.add_argument('-I', "--input-glob", type=str, default=[], action="append", help="custom wordlist(s) as a glob (can be passed multiple times and combined with -i)")
 parser.add_argument('-d', "--delimiter", default='\n', help="word delimiter for input files (default: newline)")
 parser.add_argument('-m', "--min-wordlen", type=positive_int_arg, default=6, help="min length of words to use (default: %(default)s)")
 parser.add_argument('-a', "--max-wordlen", type=positive_int_arg_nonzero, default=float("inf"), help="max length of words to use (default: no max)")
@@ -128,10 +130,15 @@ trans_table = {
     'i': ['!'],
 }
 
-if args.input_dict is not None:
-    input_files = args.input_dict
+input_files = []
+if args.input_dict or args.input_glob:
+    for f in args.input_dict:
+        input_files.append(f)
+    for g in args.input_glob:
+        for fname in glob.glob(g):
+            if os.path.isfile(fname):
+                input_files.append(open(fname))
 else:
-    input_files = []
     input_filenames = ["words.txt"]
     for fname in input_filenames:
         input_files.append(open(relpath(fname)))
