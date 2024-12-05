@@ -139,7 +139,7 @@ if args.input_dict or args.input_glob:
             if os.path.isfile(fname):
                 input_files.append(open(fname))
 else:
-    input_filenames = ["words.txt"]
+    input_filenames = [os.path.join("wordlists", el) for el in ["words.txt"]]
     for fname in input_filenames:
         input_files.append(open(relpath(fname)))
 
